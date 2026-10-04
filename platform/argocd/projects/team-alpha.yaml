@@ -6,7 +6,7 @@ metadata:
 spec:
   description: team-alpha applications in staging and production
   sourceRepos:
-    - https://github.com/andreimahu/k8s-deployment-platform-dev.git
+    - https://github.com/andreimahu/k8s-deployment-platform-mvp.git
   destinations:
     - server: https://kubernetes.default.svc
       namespace: team-alpha-staging

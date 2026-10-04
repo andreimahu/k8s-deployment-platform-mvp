@@ -8,7 +8,7 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   generators:
     - git:
-        repoURL: https://github.com/andreimahu/k8s-deployment-platform-dev.git
+        repoURL: https://github.com/andreimahu/k8s-deployment-platform-mvp.git
         revision: main
         files:
           - path: team-beta-k8s-deployments-repo/*/staging/app.yaml
@@ -22,13 +22,13 @@ spec:
     spec:
       project: team-beta
       sources:
-        - repoURL: https://github.com/andreimahu/k8s-deployment-platform-dev.git
+        - repoURL: https://github.com/andreimahu/k8s-deployment-platform-mvp.git
           targetRevision: main
           path: charts/three-tier-app
           helm:
             valueFiles:
               - '$values/{{ .path.path }}/{{ .path.filename }}'
-        - repoURL: https://github.com/andreimahu/k8s-deployment-platform-dev.git
+        - repoURL: https://github.com/andreimahu/k8s-deployment-platform-mvp.git
           targetRevision: main
           ref: values
       destination:
