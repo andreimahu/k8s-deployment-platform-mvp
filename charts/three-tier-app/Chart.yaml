@@ -1,0 +1,4 @@
+apiVersion: v2
+name: three-tier-app
+description: Configurable application components with a local PostgreSQL database.
+version: 0.2.0

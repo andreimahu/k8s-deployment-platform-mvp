@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: team-beta
+  namespace: argocd
+spec:
+  description: team-beta applications in staging and production
+  sourceRepos:
+    - https://github.com/andreimahu/k8s-deployment-platform-dev.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: team-beta-staging
+    - server: https://kubernetes.default.svc
+      namespace: team-beta-production
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: Deployment
+    # Include workload children so they appear in the Application resource tree.
+    - group: apps
+      kind: ReplicaSet
+    - group: ""
+      kind: Pod
+    - group: ""
+      kind: Service
+  roles:
+    - name: deployer
+      description: View and sync this team's applications
+      groups:
+        - team-beta
+      policies:
+        - p, proj:team-beta:deployer, applications, get, team-beta/*, allow
+        - p, proj:team-beta:deployer, applications, sync, team-beta/*, allow

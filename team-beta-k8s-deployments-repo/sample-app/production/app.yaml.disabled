@@ -1,0 +1,7 @@
+components:
+  web:
+    image: sample-app-web:local
+    replicas: 1
+  api:
+    image: sample-app-api:local
+    replicas: 1

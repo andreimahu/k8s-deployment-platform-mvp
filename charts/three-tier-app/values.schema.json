@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["components", "database"],
+  "properties": {
+    "components": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z]([-a-z0-9]*[a-z0-9])?$",
+        "maxLength": 63,
+        "not": {"const": "db"}
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["image"],
+        "properties": {
+          "image": {"type": "string", "minLength": 1},
+          "replicas": {"type": "integer", "minimum": 0},
+          "command": {"type": "array", "items": {"type": "string"}},
+          "args": {"type": "array", "items": {"type": "string"}},
+          "database": {"type": "boolean"},
+          "http": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["port"],
+            "properties": {
+              "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+              "healthPath": {"type": "string", "pattern": "^/"}
+            }
+          },
+          "configuration": {
+            "type": "object",
+            "propertyNames": {"pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+            "additionalProperties": {"type": ["string", "number", "boolean"]}
+          }
+        }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image", "name", "user", "password"],
+      "properties": {
+        "image": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "user": {"type": "string", "minLength": 1},
+        "password": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

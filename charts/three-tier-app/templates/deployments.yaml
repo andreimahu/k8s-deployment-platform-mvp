@@ -1,0 +1,60 @@
+{{- range $name, $component := .Values.components }}
+{{- $resourceName := printf "%s-%s" $.Release.Name $name }}
+{{- if gt (len $resourceName) 63 }}
+{{- fail (printf "Release and component names combined must fit in 63 characters: %s" $resourceName) }}
+{{- end }}
+{{- $configuration := $component.configuration | default dict }}
+{{- if and $component.database (or (hasKey $configuration "DB_HOST") (hasKey $configuration "DB_PORT")) }}
+{{- fail (printf "Component %s: database binding sets DB_HOST and DB_PORT; omit them from configuration" $name) }}
+{{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $resourceName }}
+spec:
+  replicas: {{ dig "replicas" 1 $component }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ $.Release.Name }}
+      app.kubernetes.io/component: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ $.Release.Name }}
+        app.kubernetes.io/component: {{ $name }}
+    spec:
+      containers:
+        - name: {{ $name }}
+          image: {{ $component.image | quote }}
+          imagePullPolicy: IfNotPresent
+          {{- with $component.command }}
+          command: {{ toJson . }}
+          {{- end }}
+          {{- with $component.args }}
+          args: {{ toJson . }}
+          {{- end }}
+          {{- if or $component.database $configuration }}
+          env:
+            {{- if $component.database }}
+            - name: DB_HOST
+              value: {{ printf "%s-db" $.Release.Name | quote }}
+            - name: DB_PORT
+              value: "5432"
+            {{- end }}
+            {{- range $key, $value := $configuration }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+          {{- with $component.http }}
+          ports:
+            - containerPort: {{ .port }}
+          {{- if .healthPath }}
+          readinessProbe:
+            httpGet:
+              path: {{ .healthPath | quote }}
+              port: {{ .port }}
+          {{- end }}
+          {{- end }}
+{{- end }}

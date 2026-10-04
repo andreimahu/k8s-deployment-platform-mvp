@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: team-alpha
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/andreimahu/k8s-deployment-platform-dev.git
+        revision: main
+        files:
+          - path: team-alpha-k8s-deployments-repo/*/staging/app.yaml
+          - path: team-alpha-k8s-deployments-repo/*/production/app.yaml
+  syncPolicy:
+    preserveResourcesOnDeletion: false
+  template:
+    metadata:
+      name: 'team-alpha-{{ index .path.segments 1 }}-{{ .path.basename }}'
+      namespace: argocd
+    spec:
+      project: team-alpha
+      sources:
+        - repoURL: https://github.com/andreimahu/k8s-deployment-platform-dev.git
+          targetRevision: main
+          path: charts/three-tier-app
+          helm:
+            valueFiles:
+              - '$values/{{ .path.path }}/{{ .path.filename }}'
+        - repoURL: https://github.com/andreimahu/k8s-deployment-platform-dev.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'team-alpha-{{ .path.basename }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
